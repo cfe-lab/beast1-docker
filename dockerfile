@@ -82,6 +82,4 @@ RUN rm -rf build
 
 ENV LD_LIBRARY_PATH /usr/local/beagle-lib-master/lib
 
-CMD /usr/local/bin/beast
-
-
+CMD cd /mnt/input && /usr/local/bin/beast *.xml && mv *.trees *.ops *.log /mnt/output
