@@ -27,11 +27,11 @@ RUN mkdir -p /usr/local/beagle-lib-master/include
 RUN install -m 644 libhmsbeagle/beagle.h libhmsbeagle/platform.h     /usr/local/beagle-lib-master/include
 
 RUN mkdir -p /usr/local/beagle-lib-master/lib
-RUN install -m 755 libhmsbeagle/CPU/.libs/*.so.21.0.0 /usr/local/beagle-lib-master/lib
+RUN install -m 755 libhmsbeagle/CPU/.libs/*.so* /usr/local/beagle-lib-master/lib
 RUN install -m 755 libhmsbeagle/CPU/.libs/*.la        /usr/local/beagle-lib-master/lib
 
 
-RUN install -m 755 libhmsbeagle/.libs/*.so.1.1.1 /usr/local/beagle-lib-master/lib
+RUN install -m 755 libhmsbeagle/.libs/*.so* /usr/local/beagle-lib-master/lib
 RUN install -m 755 libhmsbeagle/.libs/*.la       /usr/local/beagle-lib-master/lib
 RUN install -m 755 libhmsbeagle/JNI/libhmsbeagle-jni.la       /usr/local/beagle-lib-master/lib
 RUN install -m 755 libhmsbeagle/JNI/.libs/libhmsbeagle-jni.so /usr/local/beagle-lib-master/lib
