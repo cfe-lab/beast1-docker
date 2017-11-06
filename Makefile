@@ -2,6 +2,10 @@
 
 default: help
 
+BEASTGCCALPINE = beast1.8.4-gcc-alpine
+BEASTGCCCENTOS = beast1.8.4-gcc-centos7
+BEASTPGCUBUNTU = beast1.8.4-pgc-ubuntu16.04
+
 # NOTE: this code taken from https://gist.github.com/rcmachado/af3db315e31383502660
 help: 
 	$(info Available targets:)
@@ -18,13 +22,26 @@ help:
         width=$$(grep -o '^[a-zA-Z_0-9]\+:' $(MAKEFILE_LIST) | wc -L)  \
 	$(MAKEFILE_LIST)
 
-build: ## build the beast1.8.4 image from the provided docker file
-	docker build -t beast1.8.4 .
+build-gcc-centos: ## build beast using gcc in a centos base image
+	docker build -f ${BEASTGCCCENTOS}.dock -t ${BEASTGCCCENTOS} .
+runtest-gcc-centos: ## run the gcc-centos image and start beast
+	docker run --rm -it ${BEASTGCCCENTOS}
+run-gcc-centos: ## run the gcc-centos image interactively
+	docker run --rm -it ${BEASTGCCCENTOS} bash
+#--
+build-gcc-alpine: ## build beast using gcc in an alpine base image
+	docker build -f ${BEASTGCCALPINE}.dock -t ${BEASTGCCALPINE} .
+runtest-gcc-alpine: ## run the gcc-alpine image and start beast
+	docker run --rm -it ${BEASTGCCALPINE}
+run-gcc-alpine: ## run the gcc-alpine image interactively
+	docker run --rm -it ${BEASTGCCALPINE} sh
+#--
+build-pgc-ubuntu: ## build beast using pgc in an ubuntu 16.06  base image
+	docker build -f ${BEASTPGCUBUNTU}.dock -t ${BEASTPGCUBUNTU} .
+runtest-pgc-ubuntu: ## run the pgc-ubuntu image and start beast
+	docker run --rm -it ${BEASTPGCUBUNTU}
+run-pgc-ubuntu: ## run the pgc-ubuntu image interactively
+	docker run --rm -it ${BEASTPGCUBUNTU} bash
 
-save: ## save the beast1.8.4 image to a file 'beast1.8.4-image.tar'
-	docker save beast1.8.4 > beast1.8.4-image.tar
-runtest: ## run the beast1.8.4 image and start beast
-	docker run --rm -it beast1.8.4 
-run: ## run the beast1.8.4 image interactively
-	# docker run -e LD_LIBRARY_PATH=/usr/local/beagle-lib-master/lib -it beast1.8.4 bash
-	docker run --rm -it beast1.8.4 bash
+build-all: build-gcc-centos build-gcc-alpine build-pgc-ubuntu ## build all three images
+

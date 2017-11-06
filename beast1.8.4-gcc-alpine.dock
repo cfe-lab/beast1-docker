@@ -1,0 +1,70 @@
+# docker file for with BEAST 1.8.4 and beagle, compiled with gcc on an alpine OS
+
+FROM openjdk:alpine
+
+MAINTAINER wscott@cfenet.ubc.ca
+
+WORKDIR /root
+
+RUN apk update
+
+# ---------------- install beagle ------------------------
+RUN apk add git autoconf automake m4 libtool make coreutils gcc musl-dev;\
+    mkdir beagle ;\
+    cd beagle ;\
+    git clone https://github.com/beagle-dev/beagle-lib.git  .  ;\
+    ./autogen.sh ;\
+    ./configure --prefix=/usr/local/beagle-lib-master CFLAGS='-O3 -march=core2 -msse2' CXXFLAGS='-O3 -march=core2 -msse2' ;\
+  make  ;\
+  mkdir -p /usr/local/beagle-lib-master/include  ;\
+  install -m 644 libhmsbeagle/beagle.h libhmsbeagle/platform.h     /usr/local/beagle-lib-master/include  ;\
+mkdir -p /usr/local/beagle-lib-master/lib ;\
+install -m 755 libhmsbeagle/CPU/.libs/*.so.21.0.0 /usr/local/beagle-lib-master/lib ;\
+install -m 755 libhmsbeagle/CPU/.libs/*.la        /usr/local/beagle-lib-master/lib ;\
+install -m 755 libhmsbeagle/.libs/*.so* /usr/local/beagle-lib-master/lib ;\
+install -m 755 libhmsbeagle/.libs/*.la       /usr/local/beagle-lib-master/lib ;\
+install -m 755 libhmsbeagle/JNI/libhmsbeagle-jni.la       /usr/local/beagle-lib-master/lib ;\
+    cd .. ;\
+    rm -rf beagle ;\
+    apk del git autoconf automake m4 libtool make coreutils gcc musl-dev
+
+# NOTE: need the 'apk add --update openssl' instruction below so that wget works
+# ------------------ install beast -----------------------
+RUN mkdir beast; cd beast ;\
+   apk add --update openssl ;\
+   wget https://github.com/beast-dev/beast-mcmc/releases/download/v1.8.4/BEASTv1.8.4.tgz ;\
+   tar -zxvf BEASTv1.8.4.tgz ;\
+   mkdir -p /usr/local/BEAST-1.8.4/bin  ;\
+   mkdir -p /usr/local/BEAST-1.8.4/lib ;\
+   mkdir -p /usr/local/BEAST-1.8.4/doc ;\
+   mkdir -p /usr/local/BEAST-1.8.4/examples;\
+   mkdir -p /usr/local/BEAST-1.8.4/images;\
+   mkdir -p /usr/local/BEAST-1.8.4/native;\
+   cp  BEASTv1.8.4/bin/* /usr/local/BEAST-1.8.4/bin/. ;\
+     chmod 755 /usr/local/BEAST-1.8.4/bin/*  ;\
+   cp  BEASTv1.8.4/lib/* /usr/local/BEAST-1.8.4/lib/. ;\
+     chmod 444 /usr/local/BEAST-1.8.4/lib/* ;\
+   cp  BEASTv1.8.4/doc/* /usr/local/BEAST-1.8.4/doc/. ;\
+     chmod 444 /usr/local/BEAST-1.8.4/doc/* ;\
+   cp  -R BEASTv1.8.4/examples/* /usr/local/BEAST-1.8.4/examples/. ;\
+     chmod -R 444 /usr/local/BEAST-1.8.4/examples/* ;\
+   cp  BEASTv1.8.4/images/* /usr/local/BEAST-1.8.4/images/.  ;\
+     chmod 444 /usr/local/BEAST-1.8.4/images/* ;\
+   cp  BEASTv1.8.4/native/* /usr/local/BEAST-1.8.4/native/. ;\
+     chmod 444 /usr/local/BEAST-1.8.4/native/* ;\
+   ln -s /usr/local/BEAST-1.8.4/bin/beast /usr/local/bin/beast ;\
+   ln -s /usr/local/BEAST-1.8.4/bin/beauti /usr/local/bin/beauti  ;\
+   ln -s /usr/local/BEAST-1.8.4/bin/loganalyser /usr/local/bin/loganalyser ;\
+   ln -s /usr/local/BEAST-1.8.4/bin/logcombiner /usr/local/bin/logcombiner ;\
+   ln -s /usr/local/BEAST-1.8.4/bin/treeannotator /usr/local/bin/treeannotator ;\
+   ln -s /usr/local/BEAST-1.8.4/bin/treestat /usr/local/bin/treestat ;\
+   ln -s /usr/local/BEAST-1.8.4/lib/beast.jar /usr/local/lib/beast.jar ;\
+   ln -s /usr/local/BEAST-1.8.4/lib/beauti.jar /usr/local/lib/beauti.jar ;\
+   ln -s /usr/local/BEAST-1.8.4/lib/libNucleotideLikelihoodCore32.so /usr/local/lib/libNucleotideLikelihoodCore32.so ;\
+   ln -s /usr/local/BEAST-1.8.4/lib/libNucleotideLikelihoodCore.so /usr/local/lib/libNucleotideLikelihoodCore.so ;\
+   cd ..; rm -rf beast
+
+
+ENV LD_LIBRARY_PATH /usr/local/beagle-lib-master/lib
+
+CMD cd /mnt/input && /usr/local/bin/beast *.xml && mv *.trees *.ops *.log /mnt/output
