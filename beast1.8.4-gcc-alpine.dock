@@ -9,7 +9,7 @@ WORKDIR /root
 RUN apk update
 
 # ---------------- install beagle ------------------------
-RUN apk add git autoconf automake m4 libtool make coreutils gcc musl-dev;\
+RUN apk add --no-cache git --virtual .beagle-deps autoconf automake m4 libtool make coreutils gcc musl-dev;\
     mkdir beagle ;\
     cd beagle ;\
     git clone https://github.com/beagle-dev/beagle-lib.git  .  ;\
@@ -26,12 +26,14 @@ install -m 755 libhmsbeagle/.libs/*.la       /usr/local/beagle-lib-master/lib ;\
 install -m 755 libhmsbeagle/JNI/libhmsbeagle-jni.la       /usr/local/beagle-lib-master/lib ;\
     cd .. ;\
     rm -rf beagle ;\
-    apk del git autoconf automake m4 libtool make coreutils gcc musl-dev
+    apk del .beagle-deps
+
+# apk del git autoconf automake m4 libtool make coreutils gcc musl-dev
 
 # NOTE: need the 'apk add --update openssl' instruction below so that wget works
 # ------------------ install beast -----------------------
 RUN mkdir beast; cd beast ;\
-   apk add --update openssl ;\
+   apk add --no-cache --virtual .beast-deps --update openssl ;\
    wget https://github.com/beast-dev/beast-mcmc/releases/download/v1.8.4/BEASTv1.8.4.tgz ;\
    tar -zxvf BEASTv1.8.4.tgz ;\
    mkdir -p /usr/local/BEAST-1.8.4/bin  ;\
@@ -62,7 +64,8 @@ RUN mkdir beast; cd beast ;\
    ln -s /usr/local/BEAST-1.8.4/lib/beauti.jar /usr/local/lib/beauti.jar ;\
    ln -s /usr/local/BEAST-1.8.4/lib/libNucleotideLikelihoodCore32.so /usr/local/lib/libNucleotideLikelihoodCore32.so ;\
    ln -s /usr/local/BEAST-1.8.4/lib/libNucleotideLikelihoodCore.so /usr/local/lib/libNucleotideLikelihoodCore.so ;\
-   cd ..; rm -rf beast
+   cd ..; rm -rf beast ;\
+   apk del .beast-deps
 
 
 ENV LD_LIBRARY_PATH /usr/local/beagle-lib-master/lib
